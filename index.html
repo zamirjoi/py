@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>P2P Contacts Book</title>
+<title>P2P Secure Chat</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <style>
@@ -106,24 +106,25 @@ if (!mySavedId) {
     localStorage.setItem('myPeerId', mySavedId);
 }
 
-// 2. Start PeerJS with a Heavy-Duty TURN Server
+// 2. Start PeerJS with TURN Servers for Mobile Data connection
 peer = new Peer(mySavedId, {
     config: {
         'iceServers': [
-            { urls: 'stun:stun.l.google.com:19302' }, // Standard Google STUN
+            { urls: 'stun:stun.l.google.com:19302' },
             { 
-                urls: 'turn:openrelay.metered.ca:80', // Free Public TURN Bridge
+                urls: 'turn:openrelay.metered.ca:80',
                 username: 'openrelayproject',
                 credential: 'openrelayproject'
             },
             { 
-                urls: 'turn:openrelay.metered.ca:443', // Backup Port
+                urls: 'turn:openrelay.metered.ca:443',
                 username: 'openrelayproject',
                 credential: 'openrelayproject'
             }
         ]
     }
 });
+
 peer.on('open', id => document.getElementById('myId').innerText = id);
 
 // Catch errors
@@ -142,7 +143,7 @@ peer.on('error', err => {
     }
 });
 
-// NEW: Copy ID Function
+// Copy ID Function
 function copyMyId() {
     let idText = document.getElementById('myId').innerText;
     if (idText === "Loading...") return;
@@ -150,23 +151,21 @@ function copyMyId() {
     navigator.clipboard.writeText(idText).then(() => {
         let alertBox = document.getElementById('copyAlert');
         alertBox.innerText = "ID Copied to clipboard!";
-        setTimeout(() => alertBox.innerText = "", 2000); // clear after 2 seconds
+        setTimeout(() => alertBox.innerText = "", 2000); 
     }).catch(err => alert("Copy failed: " + err));
 }
 
-// NEW: Share ID Function
+// Share ID Function
 function shareMyId() {
     let idText = document.getElementById('myId').innerText;
     if (idText === "Loading...") return;
 
-    // Check if the device supports the native share menu (mostly mobile)
     if (navigator.share) {
         navigator.share({
             title: 'My P2P Chat ID',
             text: 'Add me on our secure chat app! My ID is: ' + idText
         }).catch(err => console.log("Share cancelled", err));
     } else {
-        // Fallback for desktops that don't have a share menu
         copyMyId();
         alert("Sharing not supported on this device. ID copied to clipboard instead!");
     }
@@ -244,7 +243,7 @@ function connectToFriend(targetId) {
             statusBox.style.color = "#ff4444";
             statusBox.innerText = friendName + " is not responding. Make sure their tab is open.";
         }
-    }, 5000);
+    }, 7000); // Increased timeout to 7 seconds for slower mobile networks
 
     setupConnection(friendName, timeout);
 }
