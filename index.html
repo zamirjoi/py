@@ -9,7 +9,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-
+/* =========================================
+   BASE STYLES & LAYOUT
+   ========================================= */
 body { margin:0; background:#111; display:flex; justify-content:center; font-family: 'Segoe UI', Arial, sans-serif; height: 100vh; align-items: center; }
 #phone { width: 100%; max-width: 450px; height: 100vh; background:#0b141a; display:flex; flex-direction:column; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 
@@ -19,35 +21,28 @@ body { margin:0; background:#111; display:flex; justify-content:center; font-fam
 
 header { background:#075e54; color:white; padding:18px; font-size:18px; font-weight: bold; text-align: center; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 10; }
 
-
+/* =========================================
+   CONTACTS SCREEN
+   ========================================= */
 #contactsScreen { flex: 1; padding: 20px; display: flex; flex-direction: column; color: white; overflow-y: auto; background: linear-gradient(180deg, #111b21 0%, #0b141a 100%); }
 .my-info { background: #202c33; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-/* Action Buttons */
 .action-row { display: flex; justify-content: center; gap: 12px; margin-top: 15px; }
 .action-btn { background: #2a3942; border: none; color: white; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
 .action-btn:hover { background: #3a4a54; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-.action-btn:active { transform: scale(0.95); }
 
-/* Add Contact */
 .add-contact { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; background: #202c33; padding: 18px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 .add-contact input { padding: 12px; border-radius: 8px; border: 1px solid #2a3942; background: #111b21; color: white; outline: none; font-size: 14px; transition: border 0.3s; }
 .add-contact input:focus { border-color: #25d366; }
 
+/* Clean Number Inputs */
 .add-contact input[type="number"]::-webkit-inner-spin-button, 
-.add-contact input[type="number"]::-webkit-outer-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
-}
-.add-contact input[type="number"] {
-    -moz-appearance: textfield;
-}
+.add-contact input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.add-contact input[type="number"] { -moz-appearance: textfield; }
 
 .add-contact button { background: #25d366; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #111; font-size: 15px; transition: all 0.2s ease; }
 .add-contact button:hover { background: #20b858; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.2); }
-.add-contact button:active { transform: scale(0.98); }
 
-/* Contact Row */
 .contact-row { background: #202c33; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; margin-bottom: 12px; border-left: 4px solid #25d366; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; transition: transform 0.2s, background 0.2s; animation: slideUp 0.4s ease-out forwards; opacity: 0; transform: translateY(15px); }
 .contact-row:hover { background: #2a3942; transform: translateX(5px); }
 .contact-info { display: flex; flex-direction: column; text-align: left; flex: 1; cursor: pointer; }
@@ -56,55 +51,42 @@ header { background:#075e54; color:white; padding:18px; font-size:18px; font-wei
 .delete-btn { background: #332024; border: none; color: #ff4444; font-size: 12px; font-weight: bold; cursor: pointer; padding: 8px 12px; border-radius: 6px; margin-left: 10px; transition: all 0.2s; }
 .delete-btn:hover { background: #ff4444; color: white; }
 
-
 .social-footer { margin-top: auto; padding-top: 30px; padding-bottom: 10px; text-align: center; }
 .social-footer p { color: #8696a0; font-size: 12px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
 .social-links { display: flex; justify-content: center; gap: 25px; }
 .social-icon { color: #8696a0; font-size: 26px; transition: all 0.3s ease; display: inline-block; animation: float 3s ease-in-out infinite; }
-
-/* Effects Discord and Telegram */
 .social-icon:hover { transform: translateY(-5px) scale(1.2); }
 .fa-telegram:hover { color: #0088cc; text-shadow: 0 0 15px rgba(0, 136, 204, 0.7); }
 .fa-discord:hover { color: #5865F2; text-shadow: 0 0 15px rgba(88, 101, 242, 0.7); }
-
-/* Floating Animation */
 .social-links a:nth-child(1) .social-icon { animation-delay: 0s; }
 .social-links a:nth-child(2) .social-icon { animation-delay: 0.3s; }
 
-
+/* =========================================
+   CHAT SCREEN 
+   ========================================= */
 #chatScreen { display: none; flex-direction: column; flex: 1; background: #0b141a; background-image: radial-gradient(#202c33 1px, transparent 1px); background-size: 20px 20px; } 
 #chatBox { flex:1; overflow-y:auto; padding:15px; display: flex; flex-direction: column; } 
 .msg { max-width:75%; padding:12px 16px; margin:6px 0; border-radius:12px; word-wrap: break-word; color: white; font-size: 15px; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: bottom; }
 .me { background: linear-gradient(135deg, #005c4b 0%, #007a63 100%); margin-left:auto; border-bottom-right-radius: 2px; }
 .friend { background: #202c33; border-bottom-left-radius: 2px; align-self: flex-start; }
 
-#inputBar { display:flex; padding:12px; background:#202c33; gap: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); } 
-#msgInput { flex:1; border:none; border-radius:25px; padding:14px 20px; outline:none; background: #2a3942; color: white; font-size: 15px; transition: background 0.3s; }
-#msgInput:focus { background: #3a4a54; }
-#sendBtn { border:none; border-radius:25px; padding:0 22px; background:#25d366; cursor:pointer; font-weight: bold; color: #111; font-size: 15px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+#inputBar { display:flex; padding:12px; background:#202c33; gap: 8px; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); align-items: center;} 
+#msgInput { flex:1; border:none; border-radius:25px; padding:14px 15px; outline:none; background: #2a3942; color: white; font-size: 15px; }
+
+.icon-btn { border:none; border-radius:50%; width: 45px; height: 45px; cursor:pointer; font-weight: bold; color: white; font-size: 16px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+#sendBtn { background:#25d366; color: #111; }
 #sendBtn:hover { background: #20b858; transform: scale(1.05); }
-#sendBtn:active { transform: scale(0.95); }
-.back-btn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; position: absolute; left: 15px; padding: 10px; transition: transform 0.2s; }
+
+/* Top Header Buttons */
+.back-btn { background: none; border: none; color: white; font-size: 18px; cursor: pointer; position: absolute; left: 15px; padding: 10px; transition: transform 0.2s; }
 .back-btn:hover { transform: translateX(-3px); }
+#callBtn { display: none; background: none; border: none; color: #25d366; font-size: 20px; cursor: pointer; position: absolute; right: 15px; padding: 10px; transition: transform 0.2s; }
+#callBtn:hover { transform: scale(1.1); }
 
-
-@keyframes slideUp {
-    to { opacity: 1; transform: translateY(0); }
-}
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-6px); }
-    100% { transform: translateY(0px); }
-}
-@keyframes popIn {
-    0% { opacity: 0; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1); }
-}
-@keyframes pulseGlow {
-    0% { text-shadow: 0 0 5px #25d366; }
-    50% { text-shadow: 0 0 20px #25d366; }
-    100% { text-shadow: 0 0 5px #25d366; }
-}
+@keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0px); } }
+@keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes pulseGlow { 0% { text-shadow: 0 0 5px #25d366; } 50% { text-shadow: 0 0 20px #25d366; } 100% { text-shadow: 0 0 5px #25d366; } }
 .pulse-text { animation: pulseGlow 2s infinite; }
 </style>
 </head>
@@ -112,9 +94,12 @@ header { background:#075e54; color:white; padding:18px; font-size:18px; font-wei
 <body>
 
 <div id="phone">
+    <audio id="remoteAudio" autoplay></audio>
+
     <header>
         <button id="backBtn" class="back-btn" style="display:none;" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
         <span id="headerTitle">📞 Create Private Chat</span>
+        <button id="callBtn" onclick="toggleCall()"><i class="fas fa-phone"></i></button>
     </header>
 
     <div id="contactsScreen">
@@ -153,7 +138,7 @@ header { background:#075e54; color:white; padding:18px; font-size:18px; font-wei
         <div id="chatBox"></div>
         <div id="inputBar">
             <input id="msgInput" placeholder="Message..." autocomplete="off">
-            <button id="sendBtn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+            <button id="sendBtn" class="icon-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 </div>
@@ -162,41 +147,25 @@ header { background:#075e54; color:white; padding:18px; font-size:18px; font-wei
 let peer;
 let connection;
 let savedContacts = JSON.parse(localStorage.getItem('myAddressBook') || '[]');
+let localStream = null;
+let currentCall = null;
 
-// permanent ID
+// 1. Get or create my permanent ID
 let mySavedId = localStorage.getItem('myPeerId');
 if (!mySavedId) {
     mySavedId = Math.floor(1000 + Math.random() * 9000).toString(); 
     localStorage.setItem('myPeerId', mySavedId);
 }
 
-// PeerJS Private TURN Array
+// 2. Start PeerJS with your Official Private TURN Array
 peer = new Peer(mySavedId, {
     config: {
         'iceServers': [
-            {
-                urls: "stun:stun.relay.metered.ca:80"
-            },
-            {
-                urls: "turn:global.relay.metered.ca:80",
-                username: "0d157c7646cf654640d9932a",
-                credential: "BfeyDSh0eNBg9dfx"
-            },
-            {
-                urls: "turn:global.relay.metered.ca:80?transport=tcp",
-                username: "0d157c7646cf654640d9932a",
-                credential: "BfeyDSh0eNBg9dfx"
-            },
-            {
-                urls: "turn:global.relay.metered.ca:443",
-                username: "0d157c7646cf654640d9932a",
-                credential: "BfeyDSh0eNBg9dfx"
-            },
-            {
-                urls: "turns:global.relay.metered.ca:443?transport=tcp",
-                username: "0d157c7646cf654640d9932a",
-                credential: "BfeyDSh0eNBg9dfx"
-            }
+            { urls: "stun:stun.relay.metered.ca:80" },
+            { urls: "turn:global.relay.metered.ca:80", username: "0d157c7646cf654640d9932a", credential: "BfeyDSh0eNBg9dfx" },
+            { urls: "turn:global.relay.metered.ca:80?transport=tcp", username: "0d157c7646cf654640d9932a", credential: "BfeyDSh0eNBg9dfx" },
+            { urls: "turn:global.relay.metered.ca:443", username: "0d157c7646cf654640d9932a", credential: "BfeyDSh0eNBg9dfx" },
+            { urls: "turns:global.relay.metered.ca:443?transport=tcp", username: "0d157c7646cf654640d9932a", credential: "BfeyDSh0eNBg9dfx" }
         ]
     }
 });
@@ -204,65 +173,65 @@ peer = new Peer(mySavedId, {
 peer.on('open', id => {
     let idElement = document.getElementById('myId');
     idElement.innerText = id;
-    idElement.classList.remove('pulse-text'); // Stop glowing once loaded
+    idElement.classList.remove('pulse-text'); 
 });
 
-// Catch errors
-peer.on('error', err => {
-    let statusBox = document.getElementById('statusMsg');
-    statusBox.style.color = "#ff4444"; 
-    
-    if (err.type === 'peer-unavailable') {
-        statusBox.innerText = "Failed: Friend is offline or ID is wrong.";
-    } else if (err.type === 'network') {
-        statusBox.innerText = "Failed: Check your internet connection.";
-    } else if (err.type === 'server-error') {
-        statusBox.innerText = "Failed: Server is busy. Try again later.";
-    } else {
-        statusBox.innerText = "Error: " + err.type;
+// Automatically listen for and answer incoming Voice Calls
+peer.on('call', async incomingCall => {
+    if (confirm("Incoming Voice Call! Do you want to answer?")) {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            incomingCall.answer(localStream); 
+            currentCall = incomingCall;
+            setupCallEvents(incomingCall);
+            
+            let callBtn = document.getElementById('callBtn');
+            callBtn.innerHTML = '<i class="fas fa-phone-slash"></i>';
+            callBtn.style.color = "#ff4444";
+            addMsg("🎙️ Call Connected.", "friend");
+        } catch (err) {
+            alert("Could not access microphone.");
+        }
     }
 });
 
-// Copy 
+peer.on('error', err => {
+    let statusBox = document.getElementById('statusMsg');
+    statusBox.style.color = "#ff4444"; 
+    if (err.type === 'peer-unavailable') statusBox.innerText = "Failed: Friend is offline or ID is wrong.";
+    else if (err.type === 'network') statusBox.innerText = "Failed: Check your internet connection.";
+    else statusBox.innerText = "Error: " + err.type;
+});
+
 function copyMyId() {
     let idText = document.getElementById('myId').innerText;
     if (idText === "Loading...") return;
-    
     navigator.clipboard.writeText(idText).then(() => {
         let alertBox = document.getElementById('copyAlert');
         alertBox.innerText = "ID Copied to clipboard! ✓";
         alertBox.style.opacity = 1;
         setTimeout(() => alertBox.style.opacity = 0, 2000); 
-    }).catch(err => alert("Copy failed: " + err));
+    });
 }
 
-// Share 
 function shareMyId() {
     let idText = document.getElementById('myId').innerText;
     if (idText === "Loading...") return;
-
     if (navigator.share) {
-        navigator.share({
-            title: 'Private Chat',
-            text: 'Add me on my private chat app! My ID is: ' + idText
-        }).catch(err => console.log("Share cancelled", err));
+        navigator.share({ title: 'Private Chat', text: 'Add me on my private chat app! My ID is: ' + idText });
     } else {
         copyMyId();
-        alert("Sharing not supported on this device. ID copied to clipboard instead!");
+        alert("Sharing not supported. ID copied to clipboard instead!");
     }
 }
 
-// Render Contacts List
 function renderContacts() {
     const listDiv = document.getElementById('friendsList');
     listDiv.innerHTML = '';
-    
     savedContacts.forEach((contact, index) => {
         let row = document.createElement('div');
         row.className = 'contact-row';
-        
         row.style.animationDelay = (index * 0.1) + 's'; 
-        
         row.innerHTML = `
             <div class="contact-info" onclick="connectToFriend('${contact.id}')">
                 <span class="contact-name">👤 ${contact.name}</span>
@@ -270,34 +239,24 @@ function renderContacts() {
             </div>
             <button class="delete-btn" onclick="deleteContact('${contact.id}')"><i class="fas fa-trash"></i></button>
         `;
-        
         listDiv.appendChild(row);
     });
 }
 renderContacts();
 
-// Save contact
 function addContact() {
     let nameVal = document.getElementById('newName').value.trim();
     let idVal = document.getElementById('newFriendId').value.trim();
-    
     if (!nameVal || !idVal) return alert("Please enter both a name and an ID.");
-
     let existingIndex = savedContacts.findIndex(c => c.id === idVal);
-    if (existingIndex > -1) {
-        savedContacts[existingIndex].name = nameVal; 
-    } else {
-        savedContacts.push({ name: nameVal, id: idVal });
-    }
-
+    if (existingIndex > -1) savedContacts[existingIndex].name = nameVal; 
+    else savedContacts.push({ name: nameVal, id: idVal });
     localStorage.setItem('myAddressBook', JSON.stringify(savedContacts));
     renderContacts();
-    
     document.getElementById('newName').value = '';
     document.getElementById('newFriendId').value = '';
 }
 
-// Delete contact
 function deleteContact(targetId) {
     if (confirm("Are you sure you want to delete this contact?")) {
         savedContacts = savedContacts.filter(c => c.id !== targetId);
@@ -314,7 +273,6 @@ function getContactName(targetId) {
 function connectToFriend(targetId) {
     let friendName = getContactName(targetId);
     let statusBox = document.getElementById('statusMsg');
-    
     statusBox.style.color = "#25d366";
     statusBox.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Connecting to ${friendName}...`;
     
@@ -333,28 +291,24 @@ function connectToFriend(targetId) {
 peer.on('connection', conn => {
     connection = conn;
     let friendName = getContactName(conn.peer);
-    
     if (!savedContacts.find(c => c.id === conn.peer)) {
         savedContacts.push({ name: "Unknown", id: conn.peer });
         localStorage.setItem('myAddressBook', JSON.stringify(savedContacts));
         renderContacts();
     }
-    
     setupConnection(friendName, null);
 });
 
-// Setup the chat once connected
 function setupConnection(friendName, timeout) {
     connection.on('open', () => {
         if (timeout) clearTimeout(timeout); 
-        
         document.getElementById('contactsScreen').style.display = 'none';
         document.getElementById('chatScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('callBtn').style.display = 'block';
         document.getElementById('headerTitle').innerHTML = `👤 ${friendName}`;
         document.getElementById('chatBox').innerHTML = ''; 
         
-        // starting message
         let sysDiv = document.createElement("div");
         sysDiv.style.textAlign = "center";
         sysDiv.style.color = "#8696a0";
@@ -367,17 +321,71 @@ function setupConnection(friendName, timeout) {
     connection.on('data', data => addMsg(data, "friend"));
     
     connection.on('close', () => {
+        endCall(); 
         alert(friendName + " left the chat.");
         goBack();
     });
 }
 
-// UI Functions
+// ==========================================
+// VOICE CALL LOGIC
+// ==========================================
+async function toggleCall() {
+    let callBtn = document.getElementById('callBtn');
+    
+    if (currentCall) {
+        endCall();
+        addMsg("🔴 You ended the call.", "me");
+        return;
+    }
+
+    try {
+        addMsg("📞 Ringing...", "me");
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        
+        currentCall = peer.call(connection.peer, localStream);
+        setupCallEvents(currentCall);
+        
+        callBtn.innerHTML = '<i class="fas fa-phone-slash"></i>';
+        callBtn.style.color = "#ff4444";
+    } catch (err) {
+        alert("Microphone access denied or unavailable.");
+    }
+}
+
+function setupCallEvents(call) {
+    call.on('stream', remoteStream => {
+        document.getElementById('remoteAudio').srcObject = remoteStream;
+    });
+    call.on('close', () => {
+        endCall();
+        addMsg("🔴 Call ended by friend.", "friend");
+    });
+}
+
+function endCall() {
+    if (currentCall) currentCall.close();
+    if (localStream) localStream.getTracks().forEach(track => track.stop()); 
+    currentCall = null;
+    localStream = null;
+    
+    let callBtn = document.getElementById('callBtn');
+    if(callBtn) {
+        callBtn.innerHTML = '<i class="fas fa-phone"></i>';
+        callBtn.style.color = "#25d366";
+    }
+}
+
+// ==========================================
+// MESSAGE RENDER LOGIC
+// ==========================================
 function goBack() {
     if(connection) connection.close();
+    endCall(); 
     document.getElementById('contactsScreen').style.display = 'flex';
     document.getElementById('chatScreen').style.display = 'none';
     document.getElementById('backBtn').style.display = 'none';
+    document.getElementById('callBtn').style.display = 'none';
     document.getElementById('headerTitle').innerText = "📞 Create Private Chat";
     document.getElementById('statusMsg').innerText = "";
 }
