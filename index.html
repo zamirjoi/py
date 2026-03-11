@@ -9,9 +9,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-/* =========================================
-   BASE STYLES & LAYOUT
-   ========================================= */
+
 body { margin:0; background:#111; display:flex; justify-content:center; font-family: 'Segoe UI', Arial, sans-serif; height: 100vh; align-items: center; }
 #phone { width: 100%; max-width: 450px; height: 100vh; background:#0b141a; display:flex; flex-direction:column; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 
@@ -21,9 +19,7 @@ body { margin:0; background:#111; display:flex; justify-content:center; font-fam
 
 header { background:#075e54; color:white; padding:18px; font-size:18px; font-weight: bold; text-align: center; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 10; }
 
-/* =========================================
-   CONTACTS SCREEN
-   ========================================= */
+
 #contactsScreen { flex: 1; padding: 20px; display: flex; flex-direction: column; color: white; overflow-y: auto; background: linear-gradient(180deg, #111b21 0%, #0b141a 100%); }
 .my-info { background: #202c33; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
@@ -33,12 +29,11 @@ header { background:#075e54; color:white; padding:18px; font-size:18px; font-wei
 .action-btn:hover { background: #3a4a54; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 .action-btn:active { transform: scale(0.95); }
 
-/* Add Contact Form */
+/* Add Contact */
 .add-contact { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; background: #202c33; padding: 18px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 .add-contact input { padding: 12px; border-radius: 8px; border: 1px solid #2a3942; background: #111b21; color: white; outline: none; font-size: 14px; transition: border 0.3s; }
 .add-contact input:focus { border-color: #25d366; }
 
-/* Remove Number Input Arrows (Spinners) */
 .add-contact input[type="number"]::-webkit-inner-spin-button, 
 .add-contact input[type="number"]::-webkit-outer-spin-button { 
     -webkit-appearance: none; 
@@ -61,26 +56,22 @@ header { background:#075e54; color:white; padding:18px; font-size:18px; font-wei
 .delete-btn { background: #332024; border: none; color: #ff4444; font-size: 12px; font-weight: bold; cursor: pointer; padding: 8px 12px; border-radius: 6px; margin-left: 10px; transition: all 0.2s; }
 .delete-btn:hover { background: #ff4444; color: white; }
 
-/* =========================================
-   PREMIUM SOCIAL FOOTER
-   ========================================= */
+
 .social-footer { margin-top: auto; padding-top: 30px; padding-bottom: 10px; text-align: center; }
 .social-footer p { color: #8696a0; font-size: 12px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
 .social-links { display: flex; justify-content: center; gap: 25px; }
 .social-icon { color: #8696a0; font-size: 26px; transition: all 0.3s ease; display: inline-block; animation: float 3s ease-in-out infinite; }
 
-/* Glowing Hover Effects for Discord and Telegram */
+/* Effects Discord and Telegram */
 .social-icon:hover { transform: translateY(-5px) scale(1.2); }
 .fa-telegram:hover { color: #0088cc; text-shadow: 0 0 15px rgba(0, 136, 204, 0.7); }
 .fa-discord:hover { color: #5865F2; text-shadow: 0 0 15px rgba(88, 101, 242, 0.7); }
 
-/* Floating Animation Delays */
+/* Floating Animation */
 .social-links a:nth-child(1) .social-icon { animation-delay: 0s; }
 .social-links a:nth-child(2) .social-icon { animation-delay: 0.3s; }
 
-/* =========================================
-   CHAT SCREEN
-   ========================================= */
+
 #chatScreen { display: none; flex-direction: column; flex: 1; background: #0b141a; background-image: radial-gradient(#202c33 1px, transparent 1px); background-size: 20px 20px; } 
 #chatBox { flex:1; overflow-y:auto; padding:15px; display: flex; flex-direction: column; } 
 .msg { max-width:75%; padding:12px 16px; margin:6px 0; border-radius:12px; word-wrap: break-word; color: white; font-size: 15px; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: bottom; }
@@ -96,9 +87,7 @@ header { background:#075e54; color:white; padding:18px; font-size:18px; font-wei
 .back-btn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; position: absolute; left: 15px; padding: 10px; transition: transform 0.2s; }
 .back-btn:hover { transform: translateX(-3px); }
 
-/* =========================================
-   ANIMATIONS KEYFRAMES
-   ========================================= */
+
 @keyframes slideUp {
     to { opacity: 1; transform: translateY(0); }
 }
@@ -174,14 +163,14 @@ let peer;
 let connection;
 let savedContacts = JSON.parse(localStorage.getItem('myAddressBook') || '[]');
 
-// 1. Get or create my permanent ID
+// permanent ID
 let mySavedId = localStorage.getItem('myPeerId');
 if (!mySavedId) {
     mySavedId = Math.floor(1000 + Math.random() * 9000).toString(); 
     localStorage.setItem('myPeerId', mySavedId);
 }
 
-// 2. Start PeerJS with your Official Private TURN Array
+// PeerJS Private TURN Array
 peer = new Peer(mySavedId, {
     config: {
         'iceServers': [
@@ -234,7 +223,7 @@ peer.on('error', err => {
     }
 });
 
-// Copy ID Function
+// Copy 
 function copyMyId() {
     let idText = document.getElementById('myId').innerText;
     if (idText === "Loading...") return;
@@ -247,7 +236,7 @@ function copyMyId() {
     }).catch(err => alert("Copy failed: " + err));
 }
 
-// Share ID Function
+// Share 
 function shareMyId() {
     let idText = document.getElementById('myId').innerText;
     if (idText === "Loading...") return;
@@ -263,7 +252,7 @@ function shareMyId() {
     }
 }
 
-// 3. Render the Contacts List to the screen
+// Render Contacts List
 function renderContacts() {
     const listDiv = document.getElementById('friendsList');
     listDiv.innerHTML = '';
@@ -271,7 +260,7 @@ function renderContacts() {
     savedContacts.forEach((contact, index) => {
         let row = document.createElement('div');
         row.className = 'contact-row';
-        // Add a slight delay to each row for a waterfall effect
+        
         row.style.animationDelay = (index * 0.1) + 's'; 
         
         row.innerHTML = `
@@ -287,7 +276,7 @@ function renderContacts() {
 }
 renderContacts();
 
-// 4. Save a new contact
+// Save contact
 function addContact() {
     let nameVal = document.getElementById('newName').value.trim();
     let idVal = document.getElementById('newFriendId').value.trim();
@@ -308,7 +297,7 @@ function addContact() {
     document.getElementById('newFriendId').value = '';
 }
 
-// 5. Delete a contact
+// Delete contact
 function deleteContact(targetId) {
     if (confirm("Are you sure you want to delete this contact?")) {
         savedContacts = savedContacts.filter(c => c.id !== targetId);
@@ -322,7 +311,6 @@ function getContactName(targetId) {
     return found ? found.name : "Unknown (" + targetId + ")";
 }
 
-// 6. Connect when you click a friend
 function connectToFriend(targetId) {
     let friendName = getContactName(targetId);
     let statusBox = document.getElementById('statusMsg');
@@ -342,7 +330,6 @@ function connectToFriend(targetId) {
     setupConnection(friendName, timeout);
 }
 
-// 7. When a friend clicks YOU
 peer.on('connection', conn => {
     connection = conn;
     let friendName = getContactName(conn.peer);
@@ -367,7 +354,7 @@ function setupConnection(friendName, timeout) {
         document.getElementById('headerTitle').innerHTML = `👤 ${friendName}`;
         document.getElementById('chatBox').innerHTML = ''; 
         
-        // Add a nice starting message
+        // starting message
         let sysDiv = document.createElement("div");
         sysDiv.style.textAlign = "center";
         sysDiv.style.color = "#8696a0";
