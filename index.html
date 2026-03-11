@@ -1,121 +1,301 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple P2P Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>P2P Contacts Book</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <style>
-/* Your exact CSS */
-body{ margin:0; background:#111; display:flex; justify-content:center; font-family:Arial; height: 100vh; align-items: center; }
-#phone{ width:360px; height:640px; background:#0b141a; display:flex; flex-direction:column; position: relative; }
-header{ background:#075e54; color:white; padding:15px; font-size:18px; font-weight: bold; text-align: center; }
-#chat{ flex:1; overflow-y:auto; padding:10px; display: none; } 
-.msg{ max-width:70%; padding:8px 12px; margin:6px; border-radius:8px; word-wrap: break-word; }
-.me{ background:#005c4b; color:white; margin-left:auto; }
-.friend{ background:#202c33; color:white; }
-#inputBar{ display:none; padding:8px; background:#202c33; } 
-#msgInput{ flex:1; border:none; border-radius:20px; padding:10px; outline:none; background: #2a3942; color: white; }
-button{ margin-left:6px; border:none; border-radius:20px; padding:10px 14px; background:#25d366; cursor:pointer; font-weight: bold; }
+/* Responsive App Container */
+body { margin:0; background:#111; display:flex; justify-content:center; font-family:Arial, sans-serif; height: 100vh; align-items: center; }
+#phone { width: 100%; max-width: 450px; height: 100vh; background:#0b141a; display:flex; flex-direction:column; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-/* Setup Screen CSS */
-#setupOverlay { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; color: white; justify-content: center;}
-.setup-box { background: #202c33; padding: 15px; border-radius: 10px; text-align: center; }
-.setup-box input { width: 80%; padding: 10px; border-radius: 5px; border: none; text-align: center; font-size: 16px; font-weight: bold; margin: 10px 0; }
-.setup-btn { background: #25d366; color: black; width: 100%; margin-top: 10px; margin-left: 0; }
+@media (min-width: 451px) {
+    #phone { height: 90vh; max-height: 800px; border-radius: 10px; }
+}
+
+header { background:#075e54; color:white; padding:15px; font-size:18px; font-weight: bold; text-align: center; display: flex; align-items: center; justify-content: center; position: relative; }
+
+/* Contacts Screen */
+#contactsScreen { flex: 1; padding: 20px; display: flex; flex-direction: column; color: white; overflow-y: auto; background: #111b21; }
+.my-info { background: #202c33; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+
+/* Action Buttons (Copy/Share) */
+.action-row { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+.action-btn { background: #2a3942; border: none; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+.action-btn:hover { background: #3a4a54; }
+
+/* Add Contact Form */
+.add-contact { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; background: #202c33; padding: 15px; border-radius: 10px; }
+.add-contact input { padding: 10px; border-radius: 5px; border: none; background: #2a3942; color: white; outline: none; font-size: 14px; }
+.add-contact button { background: #25d366; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; color: black; font-size: 14px; }
+
+/* Contact Row */
+.contact-row { background: #202c33; color: white; border: none; padding: 12px 15px; border-radius: 8px; width: 100%; margin-bottom: 10px; border-left: 4px solid #25d366; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
+.contact-info { display: flex; flex-direction: column; text-align: left; flex: 1; cursor: pointer; }
+.contact-name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+.contact-id { font-size: 12px; color: #aaa; }
+.delete-btn { background: transparent; border: none; color: #ff4444; font-size: 18px; cursor: pointer; padding: 10px; margin-left: 10px; }
+
+/* Chat Screen */
+#chatScreen { display: none; flex-direction: column; flex: 1; }
+#chatBox { flex:1; overflow-y:auto; padding:10px; background: #0b141a; } 
+.msg { max-width:75%; padding:10px 14px; margin:6px; border-radius:8px; word-wrap: break-word; color: white; font-size: 15px; line-height: 1.4; }
+.me { background:#005c4b; margin-left:auto; border-bottom-right-radius: 0; }
+.friend { background:#202c33; border-bottom-left-radius: 0; }
+
+/* Input Bar */
+#inputBar { display:flex; padding:10px; background:#202c33; gap: 8px; } 
+#msgInput { flex:1; border:none; border-radius:20px; padding:12px 15px; outline:none; background: #2a3942; color: white; font-size: 15px; }
+#sendBtn { border:none; border-radius:20px; padding:0 20px; background:#25d366; cursor:pointer; font-weight: bold; color: black; font-size: 15px; }
+.back-btn { background: none; border: none; color: white; font-size: 14px; cursor: pointer; position: absolute; left: 15px; padding: 10px; margin: -10px; }
 </style>
 </head>
 
 <body>
 
 <div id="phone">
-    <header>Friend Chat</header>
+    <header>
+        <button id="backBtn" class="back-btn" style="display:none;" onclick="goBack()">&#8592; Back</button>
+        <span id="headerTitle">Contacts</span>
+    </header>
 
-    <div id="setupOverlay">
-        <div class="setup-box">
-            <strong>Your ID:</strong><br>
-            <h2 id="myId" style="color: #25d366; letter-spacing: 2px;">Loading...</h2>
-            <p style="font-size: 12px; color: gray;">Send this to your friend</p>
+    <div id="contactsScreen">
+        <div class="my-info">
+            <span style="color: #aaa; font-size: 12px;">My Permanent ID</span><br>
+            <strong id="myId" style="font-size: 28px; color: #25d366; letter-spacing: 2px;">Loading...</strong>
+            
+            <div class="action-row">
+                <button class="action-btn" onclick="copyMyId()">📋 Copy</button>
+                <button class="action-btn" onclick="shareMyId()">📤 Share</button>
+            </div>
+            <div id="copyAlert" style="color: #25d366; font-size: 12px; margin-top: 8px; height: 14px;"></div>
         </div>
         
-        <div style="text-align: center; color: gray;">-- OR --</div>
-
-        <div class="setup-box">
-            <strong>Connect to Friend:</strong><br>
-            <input type="text" id="friendId" placeholder="Enter friend's ID">
-            <button class="setup-btn" onclick="connectToFriend()">Connect</button>
+        <div class="add-contact">
+            <span style="color: white; font-size: 14px; font-weight: bold;">Add New Contact</span>
+            <input type="text" id="newName" placeholder="Name (e.g. John)">
+            <input type="number" id="newFriendId" placeholder="Their 4-Digit ID">
+            <button onclick="addContact()">Save Contact</button>
         </div>
+
+        <div style="color: #aaa; font-size: 14px; margin-bottom: 10px; font-weight: bold;">My Address Book:</div>
+        <div id="friendsList"></div>
+        <div id="statusMsg" style="color: orange; font-size: 14px; margin-top: 15px; text-align: center;"></div>
     </div>
 
-    <div id="chat"></div>
-
-    <div id="inputBar">
-        <input id="msgInput" placeholder="Type message">
-        <button onclick="sendMsg()">Send</button>
+    <div id="chatScreen">
+        <div id="chatBox"></div>
+        <div id="inputBar">
+            <input id="msgInput" placeholder="Type a message..." autocomplete="off">
+            <button id="sendBtn" onclick="sendMsg()">Send</button>
+        </div>
     </div>
 </div>
 
 <script>
-// Generate a random 4-digit ID for this user
-const myRandomId = Math.floor(1000 + Math.random() * 9000).toString();
-let peer = new Peer(myRandomId); 
+let peer;
 let connection;
+let savedContacts = JSON.parse(localStorage.getItem('myAddressBook') || '[]');
 
-// Show the ID on the screen
-peer.on('open', function(id) {
-    document.getElementById('myId').innerText = id;
-});
-
-// Switch UI when connected
-function startChatUI() {
-    document.getElementById('setupOverlay').style.display = 'none';
-    document.getElementById('chat').style.display = 'block';
-    document.getElementById('inputBar').style.display = 'flex';
-    addMsg("Connected successfully!", "friend");
+// 1. Get or create my permanent ID
+let mySavedId = localStorage.getItem('myPeerId');
+if (!mySavedId) {
+    mySavedId = Math.floor(1000 + Math.random() * 9000).toString(); 
+    localStorage.setItem('myPeerId', mySavedId);
 }
 
-// WHEN SOMEONE CONNECTS TO YOU
-peer.on('connection', function(conn) {
+// 2. Start PeerJS
+peer = new Peer(mySavedId);
+peer.on('open', id => document.getElementById('myId').innerText = id);
+
+// Catch errors
+peer.on('error', err => {
+    let statusBox = document.getElementById('statusMsg');
+    statusBox.style.color = "#ff4444"; 
+    
+    if (err.type === 'peer-unavailable') {
+        statusBox.innerText = "Failed: Friend is offline or ID is wrong.";
+    } else if (err.type === 'network') {
+        statusBox.innerText = "Failed: Check your internet connection.";
+    } else if (err.type === 'server-error') {
+        statusBox.innerText = "Failed: Free server is busy. Try again later.";
+    } else {
+        statusBox.innerText = "Error: " + err.type;
+    }
+});
+
+// NEW: Copy ID Function
+function copyMyId() {
+    let idText = document.getElementById('myId').innerText;
+    if (idText === "Loading...") return;
+    
+    navigator.clipboard.writeText(idText).then(() => {
+        let alertBox = document.getElementById('copyAlert');
+        alertBox.innerText = "ID Copied to clipboard!";
+        setTimeout(() => alertBox.innerText = "", 2000); // clear after 2 seconds
+    }).catch(err => alert("Copy failed: " + err));
+}
+
+// NEW: Share ID Function
+function shareMyId() {
+    let idText = document.getElementById('myId').innerText;
+    if (idText === "Loading...") return;
+
+    // Check if the device supports the native share menu (mostly mobile)
+    if (navigator.share) {
+        navigator.share({
+            title: 'My P2P Chat ID',
+            text: 'Add me on our secure chat app! My ID is: ' + idText
+        }).catch(err => console.log("Share cancelled", err));
+    } else {
+        // Fallback for desktops that don't have a share menu
+        copyMyId();
+        alert("Sharing not supported on this device. ID copied to clipboard instead!");
+    }
+}
+
+// 3. Render the Contacts List to the screen
+function renderContacts() {
+    const listDiv = document.getElementById('friendsList');
+    listDiv.innerHTML = '';
+    
+    savedContacts.forEach(contact => {
+        let row = document.createElement('div');
+        row.className = 'contact-row';
+        
+        row.innerHTML = `
+            <div class="contact-info" onclick="connectToFriend('${contact.id}')">
+                <span class="contact-name">👤 ${contact.name}</span>
+                <span class="contact-id">ID: ${contact.id}</span>
+            </div>
+            <button class="delete-btn" onclick="deleteContact('${contact.id}')">❌</button>
+        `;
+        
+        listDiv.appendChild(row);
+    });
+}
+renderContacts();
+
+// 4. Save a new contact
+function addContact() {
+    let nameVal = document.getElementById('newName').value.trim();
+    let idVal = document.getElementById('newFriendId').value.trim();
+    
+    if (!nameVal || !idVal) return alert("Please enter both a name and an ID.");
+
+    let existingIndex = savedContacts.findIndex(c => c.id === idVal);
+    if (existingIndex > -1) {
+        savedContacts[existingIndex].name = nameVal; 
+    } else {
+        savedContacts.push({ name: nameVal, id: idVal });
+    }
+
+    localStorage.setItem('myAddressBook', JSON.stringify(savedContacts));
+    renderContacts();
+    
+    document.getElementById('newName').value = '';
+    document.getElementById('newFriendId').value = '';
+}
+
+// 5. Delete a contact
+function deleteContact(targetId) {
+    if (confirm("Are you sure you want to delete this contact?")) {
+        savedContacts = savedContacts.filter(c => c.id !== targetId);
+        localStorage.setItem('myAddressBook', JSON.stringify(savedContacts));
+        renderContacts();
+    }
+}
+
+function getContactName(targetId) {
+    let found = savedContacts.find(c => c.id === targetId);
+    return found ? found.name : "Unknown (" + targetId + ")";
+}
+
+// 6. Connect when you click a friend
+function connectToFriend(targetId) {
+    let friendName = getContactName(targetId);
+    let statusBox = document.getElementById('statusMsg');
+    
+    statusBox.style.color = "orange";
+    statusBox.innerText = "Connecting to " + friendName + "...";
+    
+    connection = peer.connect(targetId, { reliable: true });
+    
+    let timeout = setTimeout(() => {
+        if (!connection || !connection.open) {
+            statusBox.style.color = "#ff4444";
+            statusBox.innerText = friendName + " is not responding. Make sure their tab is open.";
+        }
+    }, 5000);
+
+    setupConnection(friendName, timeout);
+}
+
+// 7. When a friend clicks YOU
+peer.on('connection', conn => {
     connection = conn;
-    connection.on('open', startChatUI);
-    connection.on('data', function(data) {
-        addMsg(data, "friend");
-    });
+    let friendName = getContactName(conn.peer);
+    
+    if (!savedContacts.find(c => c.id === conn.peer)) {
+        savedContacts.push({ name: "Unknown", id: conn.peer });
+        localStorage.setItem('myAddressBook', JSON.stringify(savedContacts));
+        renderContacts();
+    }
+    
+    setupConnection(friendName, null);
 });
 
-// WHEN YOU CONNECT TO SOMEONE ELSE
-function connectToFriend() {
-    const friendId = document.getElementById('friendId').value.trim();
-    if (!friendId) return alert("Enter an ID");
-
-    connection = peer.connect(friendId);
-    connection.on('open', startChatUI);
-    connection.on('data', function(data) {
-        addMsg(data, "friend");
+// Setup the chat once connected
+function setupConnection(friendName, timeout) {
+    connection.on('open', () => {
+        if (timeout) clearTimeout(timeout); 
+        
+        document.getElementById('contactsScreen').style.display = 'none';
+        document.getElementById('chatScreen').style.display = 'flex';
+        document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('headerTitle').innerText = friendName;
+        document.getElementById('chatBox').innerHTML = ''; 
+        addMsg("Connection secured!", "friend");
+    });
+    
+    connection.on('data', data => addMsg(data, "friend"));
+    
+    connection.on('close', () => {
+        alert(friendName + " left the chat.");
+        goBack();
     });
 }
 
-// Send Message
+// UI Functions
+function goBack() {
+    if(connection) connection.close();
+    document.getElementById('contactsScreen').style.display = 'flex';
+    document.getElementById('chatScreen').style.display = 'none';
+    document.getElementById('backBtn').style.display = 'none';
+    document.getElementById('headerTitle').innerText = "Contacts";
+    document.getElementById('statusMsg').innerText = "";
+}
+
 function sendMsg() {
     let text = document.getElementById("msgInput").value;
-    if(!text || !connection || !connection.open) return;
-
-    connection.send(text);
-    addMsg(text, "me");
-    document.getElementById("msgInput").value = "";
+    if(text && connection && connection.open) {
+        connection.send(text);
+        addMsg(text, "me");
+        document.getElementById("msgInput").value = "";
+    }
 }
 
-// Add Message to Screen
 function addMsg(text, type) {
     let div = document.createElement("div");
     div.className = "msg " + type;
     div.innerText = text;
-    document.getElementById("chat").appendChild(div);
-    document.getElementById("chat").scrollTop = 999999;
+    document.getElementById("chatBox").appendChild(div);
+    document.getElementById("chatBox").scrollTop = 999999;
 }
 
-// Press Enter to send
-document.getElementById('msgInput').addEventListener('keypress', function (e) {
+document.getElementById('msgInput').addEventListener('keypress', e => {
     if (e.key === 'Enter') sendMsg();
 });
 </script>
