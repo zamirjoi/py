@@ -106,25 +106,38 @@ if (!mySavedId) {
     localStorage.setItem('myPeerId', mySavedId);
 }
 
-// 2. Start PeerJS with TURN Servers for Mobile Data connection
+// 2. Start PeerJS with your Official Private TURN Array
 peer = new Peer(mySavedId, {
     config: {
         'iceServers': [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { 
-                urls: 'turn:openrelay.metered.ca:80',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
+            {
+                urls: "stun:stun.relay.metered.ca:80"
             },
-            { 
-                urls: 'turn:openrelay.metered.ca:443',
-                username: 'openrelayproject',
-                credential: 'openrelayproject'
+            {
+                urls: "turn:global.relay.metered.ca:80",
+                username: "0d157c7646cf654640d9932a",
+                credential: "BfeyDSh0eNBg9dfx"
+            },
+            {
+                urls: "turn:global.relay.metered.ca:80?transport=tcp",
+                username: "0d157c7646cf654640d9932a",
+                credential: "BfeyDSh0eNBg9dfx"
+            },
+            {
+                urls: "turn:global.relay.metered.ca:443",
+                username: "0d157c7646cf654640d9932a",
+                credential: "BfeyDSh0eNBg9dfx"
+            },
+            {
+                urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                username: "0d157c7646cf654640d9932a",
+                credential: "BfeyDSh0eNBg9dfx"
             }
         ]
     }
 });
 
+peer.on('open', id => document.getElementById('myId').innerText = id);
 peer.on('open', id => document.getElementById('myId').innerText = id);
 
 // Catch errors
