@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Serverless Chat</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 10px; }
+        #chat-box { height: 300px; border: 1px solid #ccc; overflow-y: auto; margin-bottom: 10px; padding: 10px; background: #fdfdfd; }
+        textarea { width: 100%; height: 80px; margin-bottom: 10px; font-size: 12px; }
+        .step { background: #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
+        .msg { margin: 5px 0; }
+        .me { color: blue; }
+        .them { color: green; }
+        button { cursor: pointer; padding: 8px 12px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <h2>Public P2P Chat (No Server)</h2>
+
+    <div id="setup">
+        <div class="step">
+            <strong>Step 1:</strong> 
+            <button id="create-btn">Create a Chat Room</button> 
+            <em>(If you are starting the chat)</em>
+        </div>
+
+        <div class="step">
+            <strong>Step 2:</strong> Copy this code and send it to your friend:
+            <textarea id="local-offer" readonly placeholder="Your connection code will appear here..."></textarea>
+        </div>
+
+        <div class="step">
+            <strong>Step 3:</strong> Paste the code your friend sent you here:
+            <textarea id="remote-offer" placeholder="Paste friend's code here..."></textarea>
+            <button id="connect-btn">Connect / Accept Answer</button>
+        </div>
+    </div>
+
+    <div id="chat-ui" class="hidden">
+        <div id="chat-box"></div>
+        <input type="text" id="message-input" placeholder="Type a message..." style="width: 80%;">
+        <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+        const pc = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Standard Google STUN server to find your public IP
+        });
+
+        let dataChannel;
+
+        // 1. Setup Data Channel
+        function setupDataChannel() {
+            dataChannel.onopen = () => {
+                document.getElementById('setup').classList.add('hidden');
+                document.getElementById('chat-ui').classList.remove('hidden');
+                appendMsg("System", "Connected! You can now chat.");
+            };
+            dataChannel.onmessage = (e) => appendMsg("Friend", e.data);
+        }
+
+        // 2. Create Room (Host)
+        document.getElementById('create-btn').onclick = async () => {
+            dataChannel = pc.createDataChannel("chat");
+            setupDataChannel();
+
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+
+            // Wait for ICE candidates (network info) to gather
+            pc.onicecandidate = (event) => {
+                if (!event.candidate) {
+                    document.getElementById('local-offer').value = btoa(JSON.stringify(pc.localDescription));
+                }
+            };
+        };
+
+        // 3. Connect/Accept (Joiner or Host responding)
+        document.getElementById('connect-btn').onclick = async () => {
+            const remoteValue = document.getElementById('remote-offer').value.trim();
+            if (!remoteValue) return alert("Please paste a code first.");
+
+            const remoteDesc = new RTCSessionDescription(JSON.parse(atob(remoteValue)));
+
+            if (remoteDesc.type === "offer") {
+                // If we are the Joiner
+                pc.ondatachannel = (event) => {
+                    dataChannel = event.channel;
+                    setupDataChannel();
+                };
+                await pc.setRemoteDescription(remoteDesc);
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+
+                pc.onicecandidate = (event) => {
+                    if (!event.candidate) {
+                        document.getElementById('local-offer').value = btoa(JSON.stringify(pc.localDescription));
+                        alert("Now copy YOUR code from Step 2 and send it back to your friend!");
+                    }
+                };
+            } else {
+                // If we are the Host receiving the answer
+                await pc.setRemoteDescription(remoteDesc);
+            }
+        };
+
+        // 4. Messaging Logic
+        document.getElementById('send-btn').onclick = sendMessage;
+        document.getElementById('message-input').onkeypress = (e) => { if(e.key === "Enter") sendMessage(); };
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const msg = input.value;
+            if (msg && dataChannel.readyState === "open") {
+                dataChannel.send(msg);
+                appendMsg("Me", msg);
+                input.value = "";
+            }
+        }
+
+        function appendMsg(sender, text) {
+            const div = document.createElement('div');
+            div.className = `msg ${sender === 'Me' ? 'me' : 'them'}`;
+            div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            document.getElementById('chat-box').appendChild(div);
+            document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+        }
+    </script>
+</body>
+</html>
