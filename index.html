@@ -1,133 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P Serverless Chat</title>
-    <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 10px; }
-        #chat-box { height: 300px; border: 1px solid #ccc; overflow-y: auto; margin-bottom: 10px; padding: 10px; background: #fdfdfd; }
-        textarea { width: 100%; height: 80px; margin-bottom: 10px; font-size: 12px; }
-        .step { background: #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
-        .msg { margin: 5px 0; }
-        .me { color: blue; }
-        .them { color: green; }
-        button { cursor: pointer; padding: 8px 12px; }
-        .hidden { display: none; }
-    </style>
+<meta charset="UTF-8">
+<title>Simple P2P Chat</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+<style>
+/* Your exact CSS */
+body{ margin:0; background:#111; display:flex; justify-content:center; font-family:Arial; height: 100vh; align-items: center; }
+#phone{ width:360px; height:640px; background:#0b141a; display:flex; flex-direction:column; position: relative; }
+header{ background:#075e54; color:white; padding:15px; font-size:18px; font-weight: bold; text-align: center; }
+#chat{ flex:1; overflow-y:auto; padding:10px; display: none; } 
+.msg{ max-width:70%; padding:8px 12px; margin:6px; border-radius:8px; word-wrap: break-word; }
+.me{ background:#005c4b; color:white; margin-left:auto; }
+.friend{ background:#202c33; color:white; }
+#inputBar{ display:none; padding:8px; background:#202c33; } 
+#msgInput{ flex:1; border:none; border-radius:20px; padding:10px; outline:none; background: #2a3942; color: white; }
+button{ margin-left:6px; border:none; border-radius:20px; padding:10px 14px; background:#25d366; cursor:pointer; font-weight: bold; }
+
+/* Setup Screen CSS */
+#setupOverlay { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; color: white; justify-content: center;}
+.setup-box { background: #202c33; padding: 15px; border-radius: 10px; text-align: center; }
+.setup-box input { width: 80%; padding: 10px; border-radius: 5px; border: none; text-align: center; font-size: 16px; font-weight: bold; margin: 10px 0; }
+.setup-btn { background: #25d366; color: black; width: 100%; margin-top: 10px; margin-left: 0; }
+</style>
 </head>
+
 <body>
 
-    <h2>Public P2P Chat (No Server)</h2>
+<div id="phone">
+    <header>Friend Chat</header>
 
-    <div id="setup">
-        <div class="step">
-            <strong>Step 1:</strong> 
-            <button id="create-btn">Create a Chat Room</button> 
-            <em>(If you are starting the chat)</em>
+    <div id="setupOverlay">
+        <div class="setup-box">
+            <strong>Your ID:</strong><br>
+            <h2 id="myId" style="color: #25d366; letter-spacing: 2px;">Loading...</h2>
+            <p style="font-size: 12px; color: gray;">Send this to your friend</p>
         </div>
+        
+        <div style="text-align: center; color: gray;">-- OR --</div>
 
-        <div class="step">
-            <strong>Step 2:</strong> Copy this code and send it to your friend:
-            <textarea id="local-offer" readonly placeholder="Your connection code will appear here..."></textarea>
-        </div>
-
-        <div class="step">
-            <strong>Step 3:</strong> Paste the code your friend sent you here:
-            <textarea id="remote-offer" placeholder="Paste friend's code here..."></textarea>
-            <button id="connect-btn">Connect / Accept Answer</button>
+        <div class="setup-box">
+            <strong>Connect to Friend:</strong><br>
+            <input type="text" id="friendId" placeholder="Enter friend's ID">
+            <button class="setup-btn" onclick="connectToFriend()">Connect</button>
         </div>
     </div>
 
-    <div id="chat-ui" class="hidden">
-        <div id="chat-box"></div>
-        <input type="text" id="message-input" placeholder="Type a message..." style="width: 80%;">
-        <button id="send-btn">Send</button>
+    <div id="chat"></div>
+
+    <div id="inputBar">
+        <input id="msgInput" placeholder="Type message">
+        <button onclick="sendMsg()">Send</button>
     </div>
+</div>
 
-    <script>
-        const pc = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Standard Google STUN server to find your public IP
-        });
+<script>
+// Generate a random 4-digit ID for this user
+const myRandomId = Math.floor(1000 + Math.random() * 9000).toString();
+let peer = new Peer(myRandomId); 
+let connection;
 
-        let dataChannel;
+// Show the ID on the screen
+peer.on('open', function(id) {
+    document.getElementById('myId').innerText = id;
+});
 
-        // 1. Setup Data Channel
-        function setupDataChannel() {
-            dataChannel.onopen = () => {
-                document.getElementById('setup').classList.add('hidden');
-                document.getElementById('chat-ui').classList.remove('hidden');
-                appendMsg("System", "Connected! You can now chat.");
-            };
-            dataChannel.onmessage = (e) => appendMsg("Friend", e.data);
-        }
+// Switch UI when connected
+function startChatUI() {
+    document.getElementById('setupOverlay').style.display = 'none';
+    document.getElementById('chat').style.display = 'block';
+    document.getElementById('inputBar').style.display = 'flex';
+    addMsg("Connected successfully!", "friend");
+}
 
-        // 2. Create Room (Host)
-        document.getElementById('create-btn').onclick = async () => {
-            dataChannel = pc.createDataChannel("chat");
-            setupDataChannel();
+// WHEN SOMEONE CONNECTS TO YOU
+peer.on('connection', function(conn) {
+    connection = conn;
+    connection.on('open', startChatUI);
+    connection.on('data', function(data) {
+        addMsg(data, "friend");
+    });
+});
 
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
+// WHEN YOU CONNECT TO SOMEONE ELSE
+function connectToFriend() {
+    const friendId = document.getElementById('friendId').value.trim();
+    if (!friendId) return alert("Enter an ID");
 
-            // Wait for ICE candidates (network info) to gather
-            pc.onicecandidate = (event) => {
-                if (!event.candidate) {
-                    document.getElementById('local-offer').value = btoa(JSON.stringify(pc.localDescription));
-                }
-            };
-        };
+    connection = peer.connect(friendId);
+    connection.on('open', startChatUI);
+    connection.on('data', function(data) {
+        addMsg(data, "friend");
+    });
+}
 
-        // 3. Connect/Accept (Joiner or Host responding)
-        document.getElementById('connect-btn').onclick = async () => {
-            const remoteValue = document.getElementById('remote-offer').value.trim();
-            if (!remoteValue) return alert("Please paste a code first.");
+// Send Message
+function sendMsg() {
+    let text = document.getElementById("msgInput").value;
+    if(!text || !connection || !connection.open) return;
 
-            const remoteDesc = new RTCSessionDescription(JSON.parse(atob(remoteValue)));
+    connection.send(text);
+    addMsg(text, "me");
+    document.getElementById("msgInput").value = "";
+}
 
-            if (remoteDesc.type === "offer") {
-                // If we are the Joiner
-                pc.ondatachannel = (event) => {
-                    dataChannel = event.channel;
-                    setupDataChannel();
-                };
-                await pc.setRemoteDescription(remoteDesc);
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
+// Add Message to Screen
+function addMsg(text, type) {
+    let div = document.createElement("div");
+    div.className = "msg " + type;
+    div.innerText = text;
+    document.getElementById("chat").appendChild(div);
+    document.getElementById("chat").scrollTop = 999999;
+}
 
-                pc.onicecandidate = (event) => {
-                    if (!event.candidate) {
-                        document.getElementById('local-offer').value = btoa(JSON.stringify(pc.localDescription));
-                        alert("Now copy YOUR code from Step 2 and send it back to your friend!");
-                    }
-                };
-            } else {
-                // If we are the Host receiving the answer
-                await pc.setRemoteDescription(remoteDesc);
-            }
-        };
+// Press Enter to send
+document.getElementById('msgInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') sendMsg();
+});
+</script>
 
-        // 4. Messaging Logic
-        document.getElementById('send-btn').onclick = sendMessage;
-        document.getElementById('message-input').onkeypress = (e) => { if(e.key === "Enter") sendMessage(); };
-
-        function sendMessage() {
-            const input = document.getElementById('message-input');
-            const msg = input.value;
-            if (msg && dataChannel.readyState === "open") {
-                dataChannel.send(msg);
-                appendMsg("Me", msg);
-                input.value = "";
-            }
-        }
-
-        function appendMsg(sender, text) {
-            const div = document.createElement('div');
-            div.className = `msg ${sender === 'Me' ? 'me' : 'them'}`;
-            div.innerHTML = `<strong>${sender}:</strong> ${text}`;
-            document.getElementById('chat-box').appendChild(div);
-            document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
-        }
-    </script>
 </body>
 </html>
